@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class MenuItem extends Model
 {
+    protected $casts = [
+        'is_available' => 'boolean',
+        'price' => 'float',
+    ];
     protected $fillable = [
         'menu_category_id',
         'name',

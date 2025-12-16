@@ -5,61 +5,109 @@ namespace Tests\Feature;
 use App\Models\MenuCategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class MenuCategoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function prevent_duplicate_menu_category_names(): void
-    {
+    #[Test]
+    public function create_menu_category_successfully(){
 
-        //PreCondition
+        //precondition
+
+        //action
+        $reponse = $this->postJson('api/v1/menu-categories', [
+            'name' => 'Beverages',
+            'is_active' => true,
+        ]);
+        //expectation
+        $reponse->assertStatus(201);
+        $this->assertDatabaseHas('menu_categories', [
+            'name' => 'Beverages',
+            'is_active' => true,
+        ]);
+    }
+
+     #[Test]
+    public function reject_duplicate_menu_category_names(){
+        //precondition
         MenuCategory::create([
             'name' => 'Beverages',
             'is_active' => true,
         ]);
+        //action
+        $reponse = $this->postJson('api/v1/menu-categories', [
+            'name' => 'beverages',
+            'is_active' => true,
+        ]);
+        //expectation
+        $reponse->assertJsonValidationErrors('name');
+        $reponse->assertJsonFragment([
+            'The category name has already been taken.'
+        ]);
+        $reponse->assertStatus(422);
+    }
 
-        //Action
-        $response = $this->postJson('/api/v1/menu-categories', [
+     #[Test]
+    public function reject_menu_category_creation_without_name(){
+        //precondition
+
+        //action
+        $reponse = $this->postJson('api/v1/menu-categories', [
+            'name' => '',
+            'is_active' => true,
+        ]);
+        //expectation
+        $reponse->assertJsonValidationErrors('name');
+        $reponse->assertJsonFragment([
+            'The category name is required.'
+        ]);
+        $reponse->assertStatus(422);
+    }
+
+     #[Test]
+    public function retrieve_active_menu_categories_only(){
+        //precondition
+        MenuCategory::create([
             'name' => 'Beverages',
             'is_active' => true,
         ]);
-
-        //Expected Result
-        $response->assertStatus(422)
-                    ->assertJsonValidationErrors(['name']);
-    }
-
-    /** @test */
-    public function case_insensitve_duplicate_name_check(): void
-    {
-        dump(config('database.default'));
-        //Precondition
         MenuCategory::create([
             'name' => 'Desserts',
-            'is_active' => true,
+            'is_active' => false,
         ]);
-        //Action
-        $reponse = $this->postJson('/api/v1/menu-categories', [
-            'name' => 'desserts',
-            'is_active' => true,
+        //action
+        $reponse = $this->getJson('api/v1/menu-categories/available');
+
+        //expectation
+        $reponse->assertJsonCount(1);
+        $reponse->assertJsonFragment([
+            'name' => 'Beverages',
         ]);
-        //Expected Result
-        $reponse->assertStatus(422)
-                ->assertJsonValidationErrors(['name']);
+        $reponse->assertStatus(200);
     }
 
-    //** @test */
-    public function prevent_editing_inactive_category(): void
-    {
-        //Precondition
-
-        //Action
-
-        //Expected Result
-
+     #[Test]
+    public function deactive_menu_category_without_deleting_data(){
+        //precondition
+        $category = MenuCategory::create([
+            'name' => 'Beverages',
+            'is_active' => true,
+        ]);
+        //action
+        $reponse = $this->patchJson("api/v1/menu-categories/{$category->id}", [
+            'name' => 'Beverages',
+            'is_active' => false,
+        ]);
+        //expectation
+        $this->assertDatabaseHas('menu_categories', [
+            'id' => $category->id,
+            'name' => 'Beverages',
+            'is_active' => false,
+        ]);
+        $reponse->assertStatus(200);
     }
 
 }

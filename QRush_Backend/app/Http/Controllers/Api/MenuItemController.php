@@ -50,7 +50,12 @@ class MenuItemController extends Controller
     {
         $validated = $request->validated();
 
-        $menu_item->update($validated);
+        $menu_item->update([
+            'menu_category_id' => $validated['menu_category_id'],
+            'name' => $validated['name'],
+            'price' => $validated['price'],
+            'is_available' => $validated['is_available'],
+        ]);
 
         return response()->json($menu_item);
     }
