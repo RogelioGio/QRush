@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\MenuCategoryRequest;
 use App\Models\MenuCategory;
 use Illuminate\Http\Request;
 
@@ -15,13 +16,10 @@ class MenuCategoryController extends Controller
         return response()->json($categories);
     }
 
-    public function store(Request $request)
+    public function store(MenuCategoryRequest $request)
     {
         // Logic to create a new menu category
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'is_active' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
         $category = MenuCategory::create([
             'name' => $validated['name'],
@@ -38,13 +36,10 @@ class MenuCategoryController extends Controller
         return response()->json($category);
     }
 
-    public function update(Request $request, MenuCategory $menu_category)
+    public function update(MenuCategoryRequest $request, MenuCategory $menu_category)
     {
         // Logic to update a specific menu category
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'is_active' => 'sometimes|boolean',
-        ]);
+        $validated = $request->validated();
 
         $menu_category->update($validated);
 
@@ -60,6 +55,17 @@ class MenuCategoryController extends Controller
             'message' => 'Menu category deactivated successfully',
             'data' => $menu_category
         ]);
+    }
+
+    public function deactiveate(MenuCategory $menu_category)
+    {
+        // // Logic to deactivate a specific menu category
+        // $menu_category->update(['is_active' => false]);
+
+        // return response()->json([
+        //     'message' => 'Menu category deactivated successfully',
+        //     'data' => $menu_category
+        // ]);
     }
 
     public function activate(MenuCategory $menu_category)
