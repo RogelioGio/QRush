@@ -6,6 +6,40 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_CONFIRMED = 'confirmed';
+    public const STATUS_PREPARING = 'preparing';
+    public const STATUS_READY = 'ready';
+    public const STATUS_SERVED = 'served';
+    public const STATUS_CANCELLED = 'cancelled';
+
+    public const STATUS_TRANSITION = [
+        self::STATUS_PENDING => [
+            self::STATUS_CONFIRMED,
+            self::STATUS_CANCELLED,
+        ],
+        self::STATUS_CONFIRMED => [
+            self::STATUS_PREPARING,
+            self::STATUS_CANCELLED,
+        ],
+        self::STATUS_PREPARING => [
+            self::STATUS_READY,
+            self::STATUS_CANCELLED,
+        ],
+        self::STATUS_READY => [
+            self::STATUS_SERVED,
+        ],
+        self::STATUS_SERVED => [],
+        self::STATUS_CANCELLED => [],
+    ];
+
+    public function canTransitionTo(string $newStatus): bool
+    {
+        return in_array($newStatus, self::STATUS_TRANSITION[$this->status] ?? [], true);
+    }
+
+
+
     protected $fillable = [
         'table_id',
         'status',

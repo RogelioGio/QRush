@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateOrderStatusRequest;
 use App\Models\MenuItem;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -42,5 +43,56 @@ class OrderController extends Controller
         }
 
         return response()->json(['order' => $validated], 201);
+    }
+
+    public function updateStatus(UpdateOrderStatusRequest $request, Order $order)
+    {
+        $newStatus = $request->validated('status');
+
+        if(! $order->canTransitionTo($newStatus)) {
+            return response()->json(['error' => 'Invalid status transition.'], 400);
+        }
+
+        $order->status = $newStatus;
+        $order->save();
+
+        return response()->json([
+            'message' => 'Order status updated successfully.',
+            'order' => $order
+        ]);
+    }
+
+    public function summary(Request $request){
+        $query = Order::with(['orderItems', 'orderItems.menuItem'])->orderBy('created_at', 'desc');
+
+        if($request->filled('status')){
+            $query->where('status', $request->status);
+        };
+
+        $orders = $query->get();
+        $total_orders = $orders->count();
+
+        $orderSummaries = [];
+        foreach($orders as $order){
+            $order_total_price = 0;
+
+            foreach($order->orderItems as $item){
+                $order_total_price += $item->price_snapshot * $item->quantity;
+            }
+
+            $orderSummaries[] = [
+                'order_id' => $order->id,
+                'table_id' => $order->table_id,
+                'status' => $order->status,
+                'created_at' => $order->created_at,
+                'items' => $order->orderItems->count(),
+                'total_price' => $order_total_price,
+            ];
+        }
+
+        return response()->json([
+            'order' => $orderSummaries,
+            'total_orders' => $total_orders,
+        ]);
     }
 }
