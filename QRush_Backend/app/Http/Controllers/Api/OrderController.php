@@ -42,7 +42,7 @@ class OrderController extends Controller
             ]);
         }
 
-        return response()->json(['order' => $validated], 201);
+        return response()->json(['order' => $order->load('orderItems')], 201);
     }
 
     public function updateStatus(UpdateOrderStatusRequest $request, Order $order)

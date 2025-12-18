@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderItem extends Model
 {
+    protected $casts = [
+        'price_snapshot' => 'float',
+    ];
+
     protected $fillable = [
         'order_id',
         'menu_item_id',
