@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateOrderStatusRequest;
 use App\Models\MenuItem;
 use App\Models\Order;
+use App\Models\Tables;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -18,11 +19,18 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+
         $validated = $request->validate([
-            'table_id' => 'required|integer',
+            'table_id' => 'required|integer|exists:tables,id',
             'status' => 'required|string',
             'order_items' => 'array|min:1',
         ]);
+
+        $table = Tables::find($request->input('table_id'));
+
+        if(!$table->is_active) {
+            return response()->json(['error' => 'Cannot place order for an inactive table.'], 400);
+        }
 
         $order = Order::create(
             [
