@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\Tables;
 use Illuminate\Http\Request;
 
@@ -29,18 +30,8 @@ class TablesController extends Controller
     }
 
     public function availability(Tables $table, Request $request){
-        $activeStatuses = [
-            'pending',
-            'confirmed',
-            'preparing',
-            'ready',
-        ];
 
-        $hasActiveOrders = $table->orders()
-            ->whereIn('status', $activeStatuses)
-            ->exists();
-
-        if ($hasActiveOrders) {
+        if ($table->hasActiveOrder) {
             return response()->json([
                 'error' => 'Cannot change availability of a table with active orders.'
             ], 400);
@@ -49,8 +40,6 @@ class TablesController extends Controller
         $status = $request->validate([
             'is_active' => 'required|boolean',
         ]);
-
-
 
         $table->update(['is_active' => $status['is_active']]);
 
@@ -64,32 +53,16 @@ class TablesController extends Controller
         $tables = Tables::orderBy('table_number', 'asc')->get();
         $totalTables = Tables::count();
         $occupiedTables = Tables::where('is_active', true)->whereHas('orders', function ($query) {
-            $activeStatuses = [
-                'pending',
-                'confirmed',
-                'preparing',
-                'ready',
-            ];
-            $query->whereIn('status', $activeStatuses);
+            $query->whereIn('status', Order::ActiveStatuses);
         })->count();
         $availableTables = Tables::where('is_active', false)->whereHas('orders',function($query){
-            $activeStatuses = [
-                'pending',
-                'confirmed',
-                'preparing',
-                'ready',
-            ];
-            $query->whereNotIn('status', $activeStatuses);
+
+            $query->whereNotIn('status', Order::ActiveStatuses);
         })->count();
 
         foreach ($tables as $table) {
-           $table->active_order_count = $table->orders()
-                ->whereIn('status', [
-                    'pending',
-                    'confirmed',
-                    'preparing',
-                    'ready',
-                ])->count();
+            $table->active_order_count = $table->orders()
+                ->whereIn('status', Order::ActiveStatuses)->count();
             $table->latest_order_status = $table->orders()->latest('created_at')->value('status');
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
@@ -33,9 +34,23 @@ class Order extends Model
         self::STATUS_CANCELLED => [],
     ];
 
+    public const ActiveStatuses = [
+        'pending',
+        'confirmed',
+        'preparing',
+        'ready',
+    ];
+
     public function canTransitionTo(string $newStatus): bool
     {
         return in_array($newStatus, self::STATUS_TRANSITION[$this->status] ?? [], true);
+    }
+
+    public function getTotalPrice(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->orderItems->sum(fn ($item) => $item->price_snapshot * $item->quantity)
+        );
     }
 
 

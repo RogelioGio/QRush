@@ -82,11 +82,6 @@ class OrderController extends Controller
 
         $orderSummaries = [];
         foreach($orders as $order){
-            $order_total_price = 0;
-
-            foreach($order->orderItems as $item){
-                $order_total_price += $item->price_snapshot * $item->quantity;
-            }
 
             $orderSummaries[] = [
                 'order_id' => $order->id,
@@ -94,7 +89,7 @@ class OrderController extends Controller
                 'status' => $order->status,
                 'created_at' => $order->created_at,
                 'items' => $order->orderItems->count(),
-                'total_price' => $order_total_price,
+                'total_price' => $order->getTotalPrice,
             ];
         }
 
