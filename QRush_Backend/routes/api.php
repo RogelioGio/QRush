@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\MenuCategoryController;
 use App\Http\Controllers\Api\MenuItemController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\TablesController;
+use App\Http\Controllers\Api\TableSessionsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Prompts\Table;
@@ -21,6 +22,12 @@ Route::prefix('v1')->group(function () {
 
     Route::patch('tables/{table}/availability', [TablesController::class, 'availability']);
     Route::get('tables/summary', [TablesController::class, 'summary']);
+
+    Route::get('kds/orders', [OrderController::class, 'kdsOrders']);
+    Route::patch('kds/orders/{order}/status', [OrderController::class, 'updateKdsOrderStatus']);
+
+    Route::patch('table_sessions/{table}/open', [TableSessionsController::class, 'openSession']);
+    Route::patch('table_sessions/{table}/close', [TableSessionsController::class, 'closeSession']);
 
     Route::apiResource('tables', TablesController::class);
     Route::apiResource('orders', OrderController::class);

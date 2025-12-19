@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateOrderStatusRequest;
+use App\Http\Resources\KdsOrderResource;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\Tables;
@@ -32,10 +33,16 @@ class OrderController extends Controller
             return response()->json(['error' => 'Cannot place order for an inactive table.'], 400);
         }
 
+        $openSession = $table->tableSessions()->where('status', 'open')->latest('opened_at')->first();
+        if(!$openSession) {
+            return response()->json(['error' => 'Cannot place order for a table without an active session.'], 400);
+        }
+
         $order = Order::create(
             [
                 'table_id' => $validated['table_id'],
                 'status' => $validated['status'],
+                'table_session_id' => $openSession->id,
             ]
         );
 
@@ -97,5 +104,48 @@ class OrderController extends Controller
             'order' => $orderSummaries,
             'total_orders' => $total_orders,
         ]);
+    }
+
+    //KDS Endpoints
+    public function kdsOrders(Request $request)
+    {
+        $query = Order::orderBy('created_at', 'asc');
+
+        if($request->filled('status')){
+            $query->where('status', $request->status);
+        }else{
+            $query->whereIn('status', ['confirmed', 'preparing']);
+        };
+        $orders = $query->get();
+
+
+
+        return response()->json(['orders' => KdsOrderResource::collection($orders)]);
+    }
+
+    public function updateKdsOrderStatus(Order $order, UpdateOrderStatusRequest $status)
+    {
+        $validatedStatus = $status->validated();
+
+        if($order->tableSession->status == 'closed'){
+            return response()->json(['error' => 'Cannot update order status for a closed table session'], 400);
+        }
+
+        if($order->status !== 'confirmed'){
+            return response()->json(['error' => 'Only orders with status confirmed can be updated'], 400);
+        }
+
+        if(! $order->canTransitionTo($validatedStatus['status'])) {
+            return response()->json(['error' => 'Invalid status transition.'], 400);
+        }
+
+        $order->status = $validatedStatus['status'];
+        $order->save();
+
+        return response()->json([
+            'message' => 'KDS Order status updated successfully.',
+            'order' => new KdsOrderResource($order)
+        ]);
+
     }
 }

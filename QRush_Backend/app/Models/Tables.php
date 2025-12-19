@@ -28,4 +28,9 @@ class Tables extends Model
     {
         return $this->hasMany(Order::class, 'table_id');
     }
+
+    public function tableSessions()
+    {
+        return $this->hasMany(TableSessions::class, 'table_id');
+    }
 }

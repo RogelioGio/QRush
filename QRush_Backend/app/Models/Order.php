@@ -58,6 +58,7 @@ class Order extends Model
     protected $fillable = [
         'table_id',
         'status',
+        'table_session_id',
     ];
 
     public function orderItems()
@@ -68,5 +69,10 @@ class Order extends Model
     public function table()
     {
         return $this->belongsTo(Tables::class, 'table_id');
+    }
+
+    public function tableSession()
+    {
+        return $this->belongsTo(TableSessions::class, 'table_session_id');
     }
 }
