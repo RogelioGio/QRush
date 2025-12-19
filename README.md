@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/Logo.svg" alt="QRush Logo" height="200">
+  <img src="./assets/Logo.svg" alt="QRush Logo" height="150">
 </p>
 
 ## 📌 Overview
@@ -17,7 +17,7 @@ The system will focus on improving accuracy, speed, and coordination across all 
 # Kitchen Display System
 the KDS sending such API responses in this sense:
 
-- # Queued Orders 
+- ### Queued Orders 
 These are the list of order that is currently confirmed or accepted by the cashier first before transferring the order to the kitchen as such this reponse shows on what the UI May expect:
 
 ```json
@@ -40,7 +40,7 @@ These are the list of order that is currently confirmed or accepted by the cashi
   ]
 }
 ```
-- # Order Status Lifecycle
+- ### Order Status Lifecycle
 The order status may not start first in the KDS but the flow will go though the KDS screen, the flow implemented as follows:
 
 ```json
