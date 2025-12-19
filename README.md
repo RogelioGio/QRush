@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/Logo.svg" alt="QRush Logo" width="180">
+  <img src="./assets/Logo.svg" alt="QRush Logo" height="200">
 </p>
 
 ## 📌 Overview
@@ -39,7 +39,7 @@ These are the list of order that is currently confirmed or accepted by the cashi
     }
   ]
 }
-
+```
 - # Order Status Lifecycle
 The order status may not start first in the KDS but the flow will go though the KDS screen, the flow implemented as follows:
 
@@ -47,5 +47,5 @@ The order status may not start first in the KDS but the flow will go though the 
 {
     pending -> confirm -> preparing -> ready -> served
 }
-
+```
 the order status may not revert as the flow strictly straight and the process of the order is also ongoing; once the order is needed to be cancelled it must be done before the order may enter preparing or confirmed 
