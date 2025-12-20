@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\BillingController;
 use App\Http\Controllers\Api\MenuCategoryController;
 use App\Http\Controllers\Api\MenuItemController;
 use App\Http\Controllers\Api\OrderController;
@@ -28,6 +29,9 @@ Route::prefix('v1')->group(function () {
 
     Route::patch('table_sessions/{table}/open', [TableSessionsController::class, 'openSession']);
     Route::patch('table_sessions/{table}/close', [TableSessionsController::class, 'closeSession']);
+
+    Route::get('billing/{tableSession}/preview', [BillingController::class, 'preview']);
+    Route::put('billing/{tableSession}/finalize', [BillingController::class, 'finalize']);
 
     Route::apiResource('tables', TablesController::class);
     Route::apiResource('orders', OrderController::class);

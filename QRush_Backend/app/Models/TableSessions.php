@@ -22,4 +22,9 @@ class TableSessions extends Model
     {
         return $this->hasMany(Order::class, 'table_session_id');
     }
+
+    public function orderItems()
+    {
+        return $this->hasManyThrough(OrderItem::class, Order::class, 'table_session_id', 'order_id');
+    }
 }
