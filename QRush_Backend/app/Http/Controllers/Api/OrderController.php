@@ -131,10 +131,9 @@ class OrderController extends Controller
             return response()->json(['error' => 'Cannot update order status for a closed table session'], 400);
         }
 
-        if($order->status !== 'confirmed'){
+        if(!in_array($order->status, ['confirmed', 'preparing', 'ready'])) {
             return response()->json(['error' => 'Only orders with status confirmed can be updated'], 400);
         }
-
         if(! $order->canTransitionTo($validatedStatus['status'])) {
             return response()->json(['error' => 'Invalid status transition.'], 400);
         }

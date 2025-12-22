@@ -27,4 +27,9 @@ class TableSessions extends Model
     {
         return $this->hasManyThrough(OrderItem::class, Order::class, 'table_session_id', 'order_id');
     }
+
+    public function payment()
+    {
+        return $this->hasOne(Payment::class, 'table_session_id');
+    }
 }
