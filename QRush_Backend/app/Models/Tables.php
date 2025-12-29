@@ -22,6 +22,7 @@ class Tables extends Model
     protected $fillable = [
         'table_number',
         'is_active',
+        'qr_token',
     ];
 
     public function orders()

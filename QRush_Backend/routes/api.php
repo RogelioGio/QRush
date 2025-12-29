@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\MenuCategoryController;
 use App\Http\Controllers\Api\MenuItemController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\QRController;
 use App\Http\Controllers\Api\TablesController;
 use App\Http\Controllers\Api\TableSessionsController;
 use App\Models\Payment;
@@ -28,6 +29,8 @@ Route::prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum', 'role:cashier'])->prefix('cashier')->group(function (){
         Route::get('orders/summary', [OrderController::class, 'summary']);
         Route::put('orders/{order}/status', [OrderController::class, 'updateStatus']);
+
+        Route::post('table_sessions/{table}/open', [TableSessionsController::class, 'openSession']);
         Route::get('tables/summary', [TablesController::class, 'summary']);
 
         Route::get('billing/{tableSession}/preview', [BillingController::class, 'preview']);
@@ -54,9 +57,14 @@ Route::prefix('v1')->group(function () {
     });
 
     //General Routes
+    Route::get('qr/table_sessions/{token}', [QRController::class, 'validate_table_session']);
+    Route::get('qr/menu', [QRController::class, 'get_menu']);
+    Route::post('qr/create_order/{token}', [QRController::class, 'create_order']);
+
+
+
     Route::post('orders', [OrderController::class, 'store']);
     Route::get('menu-categories/available', [MenuCategoryController::class, 'indexActiveCategories']);
-    Route::post('table_sessions/{table}/open', [TableSessionsController::class, 'openSession']);
     Route::patch('table_sessions/{table}/close', [TableSessionsController::class, 'closeSession']);
 
 });

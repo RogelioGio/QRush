@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Tables;
+use App\Models\TableSessions;
 use Illuminate\Http\Request;
 
 class TableSessionsController extends Controller
@@ -58,4 +59,5 @@ class TableSessionsController extends Controller
         ], 200);
 
     }
+
 }
