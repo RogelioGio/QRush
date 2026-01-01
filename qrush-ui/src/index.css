@@ -1,6 +1,20 @@
 @import "tailwindcss";
 
-:root {
+@font-face {
+  font-family: 'Lufga-Bold';
+  src: url('./assets/fonts/LufgaBold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Lufga-Regular';
+  src: url('./assets/fonts/LufgaRegular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -67,4 +81,36 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+} */
+
+@theme{
+  --font-bold-custom: 'Lufga-Bold', sans-serif;
+  --font-regular-custom: 'Lufga-Regular', sans-serif;
+
+  /* Day */
+  --color-day-bg-white: hsl(0, 0%, 100%);
+  --color-day-bg-shadow-grey: hsl(210, 11%, 15%);
+  --color-day-bg-gunmetal: hsl(210, 10%, 23%);
+  --color-day-bg-iron-grey: hsl(210, 9%, 31%);
+  --color-day-bg-pale-slate2: hsl(210, 14%, 83%);
+  /* Night */
 }
+
+@layer components {
+  .btn-white{
+    @apply py-3 px-4 border border-day-bg-shadow-grey rounded-lg;
+    @apply hover:bg-day-bg-shadow-grey hover:cursor-pointer hover:text-white transition-all
+  }
+
+  .btn-shadow-grey{
+    @apply py-3 px-4 border border-day-bg-shadow-grey rounded-lg bg-day-bg-shadow-grey text-white;
+    @apply hover:bg-white hover:cursor-pointer hover:text-day-bg-shadow-grey transition-all ;
+  }
+}
+@utility no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  &::-webkit-scrollbar {
+    display: none; /* Safari/Chrome */
+  }
+} 

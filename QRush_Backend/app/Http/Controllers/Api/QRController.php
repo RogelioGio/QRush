@@ -37,7 +37,7 @@ class QRController extends Controller
     }
 
     public function get_menu() {
-        $menu = MenuCategory::where('is_active', true)->get();
+        $menu = MenuCategory::where('is_active', true)->whereHas('Items')->get();
 
         $reponse = $menu->map(function ($category) {
             return [
@@ -49,7 +49,7 @@ class QRController extends Controller
 
         return response()->json([
             'message' => 'Menu retrieved successfully.',
-            'data' => $reponse,
+            'menuList' => $reponse,
         ], 200);
     }
 
