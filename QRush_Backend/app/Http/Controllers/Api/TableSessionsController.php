@@ -60,4 +60,37 @@ class TableSessionsController extends Controller
 
     }
 
+    public function sessions(Request $request){
+
+        $request->validate([
+            'status' => 'in:open,closed',
+        ]);
+
+        $query = TableSessions::with('table')->orderBy('opened_at', 'desc');
+
+        if ($request->has('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        $tables = $query->get()->map(function ($session) {
+            $session->is_billable = $session->orders()->whereIn('status', Order::ActiveStatuses)->doesntExist();
+            return $session;
+        });
+
+        return response()->json([
+            'message' => 'Table sessions retrieved successfully.',
+            'data' => $tables,
+        ], 200);
+    }
+
+    public function getSessionDetails(TableSessions $tableSession)
+    {
+        $tableSession->load('table', 'orders.menuItems');
+
+        return response()->json([
+            'message' => 'Table session details retrieved successfully.',
+            'data' => $tableSession,
+        ], 200);
+    }
+
 }

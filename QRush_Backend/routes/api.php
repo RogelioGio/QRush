@@ -31,7 +31,8 @@ Route::prefix('v1')->group(function () {
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus']);
 
         Route::post('table_sessions/{table}/open', [TableSessionsController::class, 'openSession']);
-        Route::get('tables/summary', [TablesController::class, 'summary']);
+        Route::get('table_session', [TableSessionsController::class, 'sessions']);
+        Route::get('table_session/{tableSession}', [TableSessionsController::class, 'getSessionDetails']);
 
         Route::get('billing/{tableSession}/preview', [BillingController::class, 'preview']);
         Route::put('billing/{tableSession}/finalize', [BillingController::class, 'finalize']);

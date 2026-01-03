@@ -6,7 +6,9 @@ import OrderingMenu from "./views/OrderingMenu";
 import ConfirmOrder from "./views/ConfirmOrder";
 import KDSLayout from "./layouts/KDSLayout";
 import CurrentOrders_KDS from "./views/CurrentOrders_KDS";
-
+import POSLayout from "./layouts/POSLayout";
+import TableOverview from "./views/TableOverView";
+import Billing from "./views/Billing";
 const router = createBrowserRouter([
     
     
@@ -46,7 +48,22 @@ const router = createBrowserRouter([
                 element: <CurrentOrders_KDS/>,
             }
         ]
+    },
+    {
+        path: "/pos",
+        element:<POSLayout/>,
+        children: [
+            {
+                path: "",
+                element: <TableOverview/>,
+            },
+            {
+                path: "billing/:session_id?",
+                element: <Billing/>
+            }
+        ]
     }
+    
 ]);
 
 export default router;
