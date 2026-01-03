@@ -28,7 +28,7 @@ Route::prefix('v1')->group(function () {
     //Cashier
     Route::middleware(['auth:sanctum', 'role:cashier'])->prefix('cashier')->group(function (){
         Route::get('orders/summary', [OrderController::class, 'summary']);
-        Route::put('orders/{order}/status', [OrderController::class, 'updateStatus']);
+        Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus']);
 
         Route::post('table_sessions/{table}/open', [TableSessionsController::class, 'openSession']);
         Route::get('tables/summary', [TablesController::class, 'summary']);

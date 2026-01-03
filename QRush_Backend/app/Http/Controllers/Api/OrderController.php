@@ -114,7 +114,7 @@ class OrderController extends Controller
         if($request->filled('status')){
             $query->where('status', $request->status);
         }else{
-            $query->whereIn('status', ['confirmed', 'preparing']);
+            $query->whereIn('status', ['confirmed', 'preparing', 'ready']);
         };
         $orders = $query->get();
 

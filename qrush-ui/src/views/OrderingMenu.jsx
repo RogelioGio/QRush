@@ -1,13 +1,74 @@
 import axios from "axios";
-import { HandPlatter, Plus, Search, UtensilsCrossed } from "lucide-react";
+import { ArrowBigLeft, ArrowRight, HandPlatter, Plus, Search, UtensilsCrossed } from "lucide-react";
 import { use, useEffect, useState } from "react";
 import axiosClient from "../axios-client";
+import { useNavigate, useParams } from "react-router-dom";
+import { useStateContext } from "../contexts/StateContext";
 
 export default function OrderingMenu() {
+    const {token} = useParams();
     const [menuList, setMenuList] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [orderItems, setOrderItems] = useState([]);
+    const [submitting, setSubmitting] = useState(false);
+    const {setOrder} = useStateContext();
+    const nav = useNavigate();
+    
+    function handleAddAddToOrder(item) {
+        const existingItem = orderItems.find(orderItem => orderItem.id === item.id);
+
+        if (existingItem) {
+            // setOrderItems(orderItems.map(orderItem =>
+            //     orderItem.id === item.id
+            //         ? { ...orderItem, quantity: orderItem.quantity + 1 }
+            //         : orderItem
+            // ));
+            setOrderItems(orderItems.filter(orderItem => orderItem.id !== item.id));
+        } else {
+            setOrderItems([...orderItems, { ...item, quantity: 1 }]);
+        }
+    }
+
+    // function handleSubmitOrder() {
+    //     if(orderItems.length === 0) return;
+    //     if (submitting) return;
+
+    //     setSubmitting(true);
+
+    //     const orderPayload = {
+    //         status: 'pending',
+    //         order_items: orderItems.map(item => ({
+    //             menu_item_id: item.id,
+    //             quantity: item.quantity
+    //         }))
+    //     };
+
+    //     // axiosClient.post(`qr/create_order/${token}`, orderPayload)
+    //     // .then(({data}) => {
+    //     //     console.log('Order submitted successfully:', data);
+    //     //     setOrderItems([]);
+    //     //     setSubmitting(false);
+    //     // })
+    //     // .catch((error) => {
+    //     //     console.log('Error submitting order:', error);
+    //     //     setSubmitting(false);
+    //     // });
+
+    //     setTimeout(() => {
+    //         setOrder(orderItems);
+    //         nav(`/qr/confirm_order/${token}`);
+    //     }, 1000);
+
+    // }
+
+    function confirmOrder() {
+        setOrder(orderItems);
+        nav(`/qr/confirm_order/${token}`);
+    }
+
+
+
 
     function fetchMenuList() {
         if (loading) return;
@@ -24,14 +85,14 @@ export default function OrderingMenu() {
         .catch((error) => {
             console.log(error);
             setLoading(false);
-        });;
+        });
     }
 
     useEffect(() => {
         fetchMenuList();
     },[])
 
-    
+    //  7f3a2b1c-8e9d-4a5b-b6c7-d8e9f0a1b2c3
 
 
     return (
@@ -58,8 +119,8 @@ export default function OrderingMenu() {
                 </div>
             </div>
 
-            <div className="w-full h-[89vh] bg-white rounded-lg">
-                <div className="py-4 sticky top-0 bg-white border-b border-day-bg-pale-slate2 z-10">
+            <div className="w-full h-[89vh] bg-white rounded-t-lg">
+                <div className="py-4 sticky top-0 bg-white border-b border-day-bg-pale-slate2 z-10 rounded-t-lg">
                     <p className="font-regular-custom px-4 pb-2 text-xs text-day-bg-iron-grey">Categories</p>
                     <div className="w-full h-fit flex flex-row gap-2 px-4 overflow-x-auto gap- snap-x snap-mandatory no-scrollbar">
                         {
@@ -105,14 +166,14 @@ export default function OrderingMenu() {
                                 : 
                                 menuList.find(category => category.id === selectedCategory)?.menu_items.map((item, i) => (
                                     <> 
-                                    <div className="w-full h-24 flex flex-row gap-4">
+                                    <div key={i} className="w-full h-24 flex flex-row gap-4">
                                         <div className="h-24 aspect-square border border-amber-400 rounded-lg">{item.name}</div>
                                         <div className="flex-1">
                                             <h6 className="font-bold-custom">{item.name}</h6>
                                             <p className="font-regular-custom text-xs">Food Description</p>
                                         </div>
                                         <div className="justify-self-end my-auto">
-                                            <button className="btn-white p-3 rounded-full">
+                                            <button className="btn-white p-3 rounded-full" onClick={()=>{handleAddAddToOrder(item)}}>
                                                 <Plus size={20} strokeWidth={3}/>
                                             </button>
                                         </div>
@@ -124,14 +185,18 @@ export default function OrderingMenu() {
                 </div>
             </div>
 
-            <div className="w-full h-fit border border-day-bg-pale-slate2 block fixed bottom-0 bg-white p-4">
-                <HandPlatter size={30} strokeWidth={2} className="inline-block mr-2"/>
-                <div>
-                    <p className="font-regular-custom text-sm inline-block mr-4">Items Selected: {orderItems.length}</p>
-                    <button className="btn-primary px-6 py-2 rounded-lg">
-                        Review Order
+            <div className={`w-full h-fit border flex flex-row gap-4 items-center justify-between border-day-bg-pale-slate2 fixed bottom-0 bg-white p-4 ${orderItems.length === 0 ? 'translate-y-full' : 'translate-y-0'} transition-transform duration-500 ease-in-out`}>
+                <div className="flex flex-row gap-2 items-center">
+                    <button className="btn-white p-3">
+                        <HandPlatter size={25} strokeWidth={2}/>
                     </button>
+                    <p className="font-regular-custom text-sm inline-block mr-4">Items Selected: {orderItems.map((items, idx) => (
+                        <p>{items.name} - {items.quantity}</p>
+                    ))}</p>
                 </div>
+                <button className="btn-shadow-grey p-3 flex gap-2 whitespace-nowrap" onClick={()=>{confirmOrder()}}>
+                    <ArrowRight size={25} strokeWidth={2}/>
+                </button>
             </div>
 
 

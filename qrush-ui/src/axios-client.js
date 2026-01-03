@@ -8,6 +8,17 @@ const axiosClient = axios.create({
     }
 })
 
+axiosClient.interceptors.request.use((config) => {
+    const token = "1|SV5cEIDli1b2T7e3JXwtJVz5NTlARUICILFBswEq7802d647"
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;},
+    (error) => {
+        return Promise.reject(error);
+    }
+)
+
 axiosClient.interceptors.response.use(
     response => response,
     error => {
