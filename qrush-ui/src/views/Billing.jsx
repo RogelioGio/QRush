@@ -9,6 +9,7 @@ export default function Billing() {
     const [fetching, setFetching] = useState(false);
     const [billingDetails, setBillingDetails] = useState([]);
     const [payment, setPayment] = useState([])
+    const [processing, setProcessing] = useState(false);
 
     function fetchBillingDetails() {
         if (!session_id) return;
@@ -50,14 +51,19 @@ export default function Billing() {
     }
 
     function processPayment() {
+        if (processing) return;
+        setProcessing(true);
+
         const confirmed = window.confirm(
             `Confirm payment of ₱${billingDetails.total_amount}?`
         );
         axiosClient.post(`cashier/billing/3/payment/confirm`).then(({data}) => {
             toast.success('Payment successful!');
+            setProcessing(false);
         }).catch((err) => {
             console.error(err);
             alert('Payment confirmation failed. Please try again.');
+            setProcessing(false);
         });
         if (!confirmed){
             return;

@@ -73,7 +73,30 @@ class TableSessionsController extends Controller
         }
 
         $tables = $query->get()->map(function ($session) {
-            $session->is_billable = $session->orders()->whereIn('status', Order::ActiveStatuses)->doesntExist();
+            $is_active = $session->orders()
+                ->whereIn('status', Order::ActiveStatuses)
+                ->exists();
+
+            $is_for_payment = $session->payment()
+                ->where('status', 'pending')
+                ->exists();
+
+            $is_billable = $session->orders()
+            ->where('status', 'served')
+            ->exists() &&
+            !$session->payments()->where('status', 'pending')->exists();
+
+            if ($is_for_payment) {
+                $statusFlag = 'for_payment';
+            } elseif ($is_billable) {
+                $statusFlag = 'billable';
+            } elseif ($is_active) {
+                $statusFlag = 'active';
+            } else {
+                $statusFlag = 'ordering';
+            }
+            $session->statusFlag = $statusFlag;
+
             return $session;
         });
 
