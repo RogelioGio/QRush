@@ -16,7 +16,7 @@ const router = createBrowserRouter([
 
 
     {
-        path: "/:token?",
+        path: "/:token?/:take_out?",
         element: <CustomerLayout/>,
         children: [
             {
@@ -30,12 +30,12 @@ const router = createBrowserRouter([
         element: <CustomerLayout/>,
         children: [
             {
-                path: "create_order/:token",
+                path: "create_order/:token/:take_out?",
                 element: <OrderingMenu/>,
             },
             {
-                path: "confirm_order/:token",
-                element: <ConfirmOrder/>,
+                path: "confirm_order/:token/:take_out?",
+                element: <ConfirmOrder/>,  
             }
         ]
     },

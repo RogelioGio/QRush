@@ -8,10 +8,13 @@ class TableSessions extends Model
 {
     protected $fillable = [
         'table_id',
+        'session_type',
         'status',
         'opened_at',
         'closed_at',
     ];
+
+    public $allowedSessionTypes = ['dine-in', 'take-out'];
 
     public function table()
     {

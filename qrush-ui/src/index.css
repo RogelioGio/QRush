@@ -98,7 +98,7 @@ button:focus-visible {
 
 @layer components {
   .btn-white{
-    @apply py-3 px-4 border border-day-bg-shadow-grey rounded-lg;
+    @apply py-3 px-4 border border-day-bg-shadow-grey rounded-lg bg-white;
     @apply hover:bg-day-bg-shadow-grey hover:cursor-pointer hover:text-white transition-all
   }
 

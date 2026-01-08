@@ -93,12 +93,13 @@ export default function CurrentOrders_KDS()
                     const confirmed = order.status === 'confirmed';
                     const ready = order.status === 'ready'; 
                     const toStatus = preparing ? 'ready' : confirmed ? 'preparing' : 'completed';
+                    const isTakeOut = order.table_id === null;
                     
                     return( 
                     <div key={idx} className={`w-full h-full bg-white rounded-lg flex flex-col row-span-${rowspan} border border-day-bg-pale-slate2 shadow-md snap-center`}>
                         <div className="flex flex-row p-4 justify-between">
                             <div>
-                                <h1 className="text-xl font-bold-custom leading-none">Table {order.table_id}</h1>
+                                <h1 className="text-xl font-bold-custom leading-none">{!isTakeOut ? "Table" . order.table_id:"Take-out-#0" + order.order_id}</h1>
                                 <p className="text-sm font-regular-custom ">ODR#{order.order_id}</p>
                             </div>
                             <div>

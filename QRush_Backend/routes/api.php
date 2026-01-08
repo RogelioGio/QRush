@@ -31,6 +31,8 @@ Route::prefix('v1')->group(function () {
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus']);
 
         Route::post('table_sessions/{table}/open', [TableSessionsController::class, 'openSession']);
+        Route::post('table_sessions/open', [TableSessionsController::class, 'openTakeOutSession']);
+
         Route::get('table_session', [TableSessionsController::class, 'sessions']);
         Route::get('table_session/{tableSession}', [TableSessionsController::class, 'getSessionDetails']);
 
@@ -59,6 +61,7 @@ Route::prefix('v1')->group(function () {
 
     //General Routes
     Route::get('qr/table_sessions/{token}', [QRController::class, 'validate_table_session']);
+    Route::get('qr/takeout_sessions/{token}', [QRController::class, 'validate_takeout_session']);
     Route::get('qr/menu', [QRController::class, 'get_menu']);
     Route::post('qr/create_order/{token}', [QRController::class, 'create_order']);
 

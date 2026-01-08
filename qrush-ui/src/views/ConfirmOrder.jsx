@@ -7,10 +7,11 @@ import { Toaster, toast } from 'sonner'
 
 export default function ConfirmOrder() {
     const {order} = useStateContext();
-    const {token} = useParams();
+    const {token, take_out} = useParams();
     const [submitting, setSubmitting] = useState(false);
     const nav = useNavigate();
-
+    const isTakeOut = take_out === 'true'; 
+    
     function handleSubmitOrder() {
         if(order.length === 0) return;
         if (submitting) return;
@@ -25,12 +26,13 @@ export default function ConfirmOrder() {
             }))
         };
 
-        axiosClient.post(`qr/create_order/${token}`, orderPayload)
+        axiosClient.post(`qr/create_order/${token}?take_out=${isTakeOut}`, orderPayload)
         .then(({data}) => {
             toast.success("Order placed successfully!");
             setSubmitting(false);
         })
         .catch((error) => {
+            toast.error("Failed to place order. Please try again.");
             setSubmitting(false);
         });
 

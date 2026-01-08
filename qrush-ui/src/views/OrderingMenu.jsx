@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useStateContext } from "../contexts/StateContext";
 
 export default function OrderingMenu() {
-    const {token} = useParams();
+    const {token, take_out} = useParams();
     const [menuList, setMenuList] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
@@ -15,6 +15,9 @@ export default function OrderingMenu() {
     const {setOrder} = useStateContext();
     const nav = useNavigate();
     
+
+    const isTakeOut = take_out === 'true'; 
+
     function handleAddAddToOrder(item) {
         const existingItem = orderItems.find(orderItem => orderItem.id === item.id);
 
@@ -30,41 +33,10 @@ export default function OrderingMenu() {
         }
     }
 
-    // function handleSubmitOrder() {
-    //     if(orderItems.length === 0) return;
-    //     if (submitting) return;
-
-    //     setSubmitting(true);
-
-    //     const orderPayload = {
-    //         status: 'pending',
-    //         order_items: orderItems.map(item => ({
-    //             menu_item_id: item.id,
-    //             quantity: item.quantity
-    //         }))
-    //     };
-
-    //     // axiosClient.post(`qr/create_order/${token}`, orderPayload)
-    //     // .then(({data}) => {
-    //     //     console.log('Order submitted successfully:', data);
-    //     //     setOrderItems([]);
-    //     //     setSubmitting(false);
-    //     // })
-    //     // .catch((error) => {
-    //     //     console.log('Error submitting order:', error);
-    //     //     setSubmitting(false);
-    //     // });
-
-    //     setTimeout(() => {
-    //         setOrder(orderItems);
-    //         nav(`/qr/confirm_order/${token}`);
-    //     }, 1000);
-
-    // }
 
     function confirmOrder() {
         setOrder(orderItems);
-        nav(`/qr/confirm_order/${token}`);
+        isTakeOut ? nav(`/qr/confirm_order/${token}/true`) : nav(`/qr/confirm_order/${token}`);
     }
 
 
@@ -78,12 +50,10 @@ export default function OrderingMenu() {
         .then(({data}) => {
             setMenuList(data.menuList);
             setSelectedCategory(data.menuList[0].id);
-            console.log(data);
             setLoading(false);
 
         })
         .catch((error) => {
-            console.log(error);
             setLoading(false);
         });
     }
@@ -103,13 +73,18 @@ export default function OrderingMenu() {
                 <div className="flex flex-row gap-x-2 items-center">    
                     <UtensilsCrossed color="white" size={40} strokeWidth={2}/>
                     <div className="text-white">
-                        <h1 className="font-bold-custom text-xl">Table 1</h1>
-                        <p className="text-xs font-regular-custom">Create an order:</p>
+                        <h1 className="font-bold-custom text-xl">{
+                                take_out === 'true' ? 'Take Out' : `Table ${token}`
+                            }</h1>
+                        <p className="text-xs font-regular-custom">Create an order</p>
                     </div>
                 </div>
-                <div className="p-4 bg-day-bg-gunmetal rounded-lg w-fit text-white">
-                    <HandPlatter size={25} strokeWidth={2}/>
-                </div>
+                {
+                    take_out !== 'true' ?
+                    <div className="p-4 bg-day-bg-gunmetal rounded-lg w-fit text-white">
+                        <HandPlatter size={25} strokeWidth={2}/>
+                    </div> : null
+                }
             </div>
 
             <div className="p-4 sticky top-0">

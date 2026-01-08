@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import no_tables from "../assets/no-tables.svg";
 import UrgencyTimerComponent from "../components/UrgerncyTimerComponent";
 import { Clock } from "lucide-react";
+import { useStateContext } from "../contexts/StateContext";
+import { toast } from "sonner";
 
 export default function TableOverview() {
     const [tables, setTables] = useState([]);
@@ -11,6 +13,7 @@ export default function TableOverview() {
     const nav = useNavigate();
     const [openSession, setOpenSession] = useState(false);
     const [selectedSession, setSelectedSession] = useState({});
+    const {setTableSession} = useStateContext();
 
     function fetchTables() {
         if (fetching) {
@@ -38,6 +41,26 @@ export default function TableOverview() {
         };
         setOpenSession(true);
         setSelectedSession(session);
+    }
+
+    function BillOut() {
+        const request =axiosClient.post(`/cashier/billing/${selectedSession.id}/payment`,
+            {
+                payment_method: 'cash',
+                reference_no: `${Math.floor(Math.random() * 1000000000)}`,
+            }
+        ).then(({data}) => {
+            nav(`billing/${selectedSession.id}`);
+        }).catch((err) => {
+            console.error(err);
+            throw err;
+        });
+
+        toast.promise(request, {
+            loading: 'Creating billing...',
+            success: 'Billing created successfully!',
+            error: 'Failed to create billing.'
+        });
     }
 
     useEffect(() => {
@@ -75,6 +98,7 @@ export default function TableOverview() {
                         : 
                         tables.map((session, idx) => {
                             const sessionStatus = session.statusFlag.charAt(0).toUpperCase() + session.statusFlag.slice(1);
+                            const isTakeOut = session.table_id === null;
                             const ordering = session.statusFlag === 'ordering';
                             const active = session.statusFlag === 'active';
                             const billable = session.statusFlag === 'billable';
@@ -83,7 +107,7 @@ export default function TableOverview() {
                             return(
                                 <div key={idx} className={`w-full h-fit bg-white rounded-lg p-4 shadow-md flex flex-row justify-between cursor-pointer hover:shadow-lg transition-all ease-in-out ${selectedSession.id === session.id ? "border-day-bg-shadow-grey" : "border-day-bg-pale-slate2"} border`} onClick={()=>{processSession(session)}}>
                                 <div>
-                                    <h1 className="font-bold-custom text-xl">Table {session.table.table_number}</h1>
+                                    <h1 className="font-bold-custom text-xl">{!isTakeOut ? `Table ${session.table.table_number}` : `Take out ${session.id}`}</h1>
                                     <p className="text-day-bg-iron-grey text-sm font-regular-custom">Session ID: {session.id}</p>
                                 </div>
                                 <div className="flex flex-col items-end justify-between">
@@ -117,10 +141,15 @@ export default function TableOverview() {
                         <p className="font-regular-custom text-xs text-day-bg-iron-grey">Ordered items:</p>
                     </div>
                     {
-                        selectedSession.statusFlag === 'billable' || selectedSession.statusFlag === 'for_payment' ?
-                        <button className="btn-shadow-grey font-regular-custom text-sm w-full" onClick={()=>{nav(`billing/${selectedSession.id}`)}}>
+                        selectedSession.statusFlag === 'billable'?
+                        <button className="btn-shadow-grey font-regular-custom text-sm w-full" onClick={()=>{BillOut(); setTableSession(selectedSession)}}>
                             Bill Out
-                        </button> : null 
+                        </button> : 
+                        selectedSession.statusFlag === 'for_payment' ?
+                        <button className="btn-shadow-grey font-regular-custom text-sm w-full" onClick={()=>{nav(`billing/${selectedSession.id}`); setTableSession(selectedSession)}}>
+                            View Billing
+                        </button>
+                        : null 
                     }
                     {/* {JSON.stringify(selectedSession)} */}
                 </div>

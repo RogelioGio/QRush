@@ -36,6 +36,24 @@ class QRController extends Controller
         ], 200);
     }
 
+    public function validate_takeout_session($token){
+        $take_outSession = TableSessions::where('id', $token)
+            ->where('session_type', 'take-out')
+            ->where('status', 'open')
+            ->first();
+
+        if(!$take_outSession){
+            return response()->json([
+                'message' => 'No valid open take-out session found.',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Take-out session is valid.',
+            'data' => $take_outSession,
+        ], 200);
+    }
+
     public function get_menu() {
         $menu = MenuCategory::where('is_active', true)->whereHas('Items')->get();
 
@@ -54,6 +72,39 @@ class QRController extends Controller
     }
 
     public function create_order($token, Request $request) {
+        $validated = $request->validate([
+            'status' => 'required|string',
+            'order_items' => 'array|min:1',
+            'order_items.*.quantity'   => 'required|integer|min:1',
+            'order_items.*.menu_item_id' => 'required|integer|exists:menu_items,id',
+        ]);
+
+        if($request->boolean('take_out')) {
+            $order = Order::create(
+                [
+                    'status' => $validated['status'],
+                    'table_session_id' => $token,
+                ]
+            );
+
+            foreach ($validated['order_items'] as $item) {
+                $menuItem = MenuItem::where('id', $item['menu_item_id'])->where('is_available', true)->first();
+
+                if(!$menuItem) {
+                    return response()->json(['error' => 'Menu item with named' . $item['menu_item_id'] . ' is not available.'], 400);
+                }
+
+                $order->orderItems()->create([
+                    'order_id' => $order->id,
+                    'menu_item_id' => $item['menu_item_id'],
+                    'quantity' => $item['quantity'],
+                    'price_snapshot' => $menuItem->price,
+                ]);
+            }
+
+            return response()->json(['order' => $order->load('orderItems')], 201);
+        }
+
         $openTable = TableSessions::whereHas('table', function ($q) use ($token){
             $q->where('qr_token', $token);
         })->where('status', 'open')->first();
@@ -63,13 +114,6 @@ class QRController extends Controller
                 'message' => 'No valid open table session found.',
             ], 404);
         }
-
-        $validated = $request->validate([
-            'status' => 'required|string',
-            'order_items' => 'array|min:1',
-            'order_items.*.quantity'   => 'required|integer|min:1',
-            'order_items.*.menu_item_id' => 'required|integer|exists:menu_items,id',
-        ]);
 
         $order = Order::create(
             [
@@ -95,7 +139,6 @@ class QRController extends Controller
         }
 
         return response()->json(['order' => $order->load('orderItems')], 201);
-
     }
 
 }

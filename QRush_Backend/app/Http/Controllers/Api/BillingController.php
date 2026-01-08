@@ -23,10 +23,11 @@ class BillingController extends Controller
 
         return response()->json([
             "table_session_id" => $tableSession->id,
-            "table_id" => $tableSession->table_id,
+            "table_id" => $tableSession->table_id || null,
             "total_orders"=> $tableSession->orders()->where('status','served')->count(),
             "total_items" => $tableSession->orders()->where('status','served')->get()->sum(fn($order) => $order->orderItems->sum('quantity')),
             "total_amount" => $tableSession->orderItems()->whereHas('order', fn($query) => $query->where('status','served'))->get()->sum(fn($item) => $item->price_snapshot * $item->quantity),
+            "payment_id" => $tableSession->payment?->id,
         ]);
     }
 

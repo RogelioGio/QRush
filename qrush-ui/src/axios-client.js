@@ -10,6 +10,8 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use((config) => {
     // "1|SV5cEIDli1b2T7e3JXwtJVz5NTlARUICILFBswEq7802d647"
+    // "2|1Zl3I3C7W2saYKpZfem6gyafeoqp9ZgtsvQuSBIs4e4a7665"
+    
     const token = "2|1Zl3I3C7W2saYKpZfem6gyafeoqp9ZgtsvQuSBIs4e4a7665"
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;

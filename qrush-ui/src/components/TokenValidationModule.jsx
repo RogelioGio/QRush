@@ -6,7 +6,7 @@ import { ShareIcon } from '@heroicons/react/24/solid'
 import { useState } from 'react';
 
 const TokenValidationModule = () => {
-    const {token} = useParams();
+    const {token, take_out} = useParams();
     const nav = useNavigate();
     const [validating, setValidating] = useState();
 
@@ -14,26 +14,36 @@ const TokenValidationModule = () => {
         if(validating) return;
         setValidating(true);
 
-        // const request = axiosClient.get(`qr/table_sessions/${token}`)
-        // .then(({data}) => {
-        //     nav(`/qr/create_order/${token}`);
-        //     setValidating(false);
-        // }).catch((error) => {
-        //     setValidating(false);
-        //     console.log(error);
-        //     throw error;
-        // });
+        let request;
 
-        // toast.promise(
-        //     request,
-        //     {
-        //         loading: 'Looking under the table… just kidding!',
-        //         success: 'You’re all set! Let’s order',
-        //         error: 'Something went wrong. Please try again.',
-        //     }
-        // );
+        if(take_out === 'true') {
+            request = axiosClient.get(`qr/takeout_sessions/${token}`)
+        } else {
+            request = axiosClient.get(`qr/table_sessions/${token}`)
+        }
 
-        nav(`/qr/create_order/${token}`);
+        toast.promise(
+            request,
+            {
+                loading: 'Looking under the table… just kidding!',
+                success: (data) => {
+                    setValidating(false);
+
+                    if(take_out === 'true'){
+                        nav(`/qr/create_order/${token}/${take_out}`);
+                    } else {
+                        nav(`/qr/create_order/${token}`);
+                    }
+
+                    return 'You’re all set! Let’s order'
+                },
+                error: (err) => {
+                    setValidating(false);
+                    console.log(err);
+                    return 'Hmm, we couldn’t find your table. Please try again.';
+                },
+            }
+        );
     }
 
 

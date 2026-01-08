@@ -10,8 +10,12 @@ use Illuminate\Http\Request;
 
 class TableSessionsController extends Controller
 {
-    public function openSession(Tables $table)
+    public function openSession(Tables $table )
     {
+        if(!$table) {
+            return response()->json(['message' => 'TakeOut.'], 200);
+        }
+
         if(! $table->is_active){
             return response()->json(['message' => 'Cannot open session on an inactive table.'], 400);
         }
@@ -30,6 +34,17 @@ class TableSessionsController extends Controller
             'message' => 'Table session opened successfully.',
             'data' => $table->tableSessions()->latest('opened_at')->first(),
         ], 200);
+    }
+
+    public function openTakeOutSession()
+    {
+        TableSessions::create([
+            'status' => 'open',
+            'opened_at' => now(),
+            'session_type' => 'take-out',
+        ]);
+
+        return response()->json(['message' => 'TakeOut.'], 200);
     }
 
     public function closeSession(Tables $table)
@@ -84,7 +99,7 @@ class TableSessionsController extends Controller
             $is_billable = $session->orders()
             ->where('status', 'served')
             ->exists() &&
-            !$session->payments()->where('status', 'pending')->exists();
+            !$session->payment()->where('status', 'pending')->exists();
 
             if ($is_for_payment) {
                 $statusFlag = 'for_payment';
